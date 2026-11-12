@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#f6e8e5" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='.9em' font-size='56'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E" />
+  <title>Тихая комната — рядом с Мирой</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main id="game">
+    <canvas id="scene" aria-label="3D-комната"></canvas>
+    <div class="vignette"></div>
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">✦</span><div><b>Тихая комната</b><small>небольшое место для двоих</small></div></div>
+      <div class="top-actions"><button class="icon-btn" id="photo" title="Снимок">⌗</button><button class="icon-btn" id="menu" title="Настройки">☰</button></div>
+    </header>
+    <div class="scene-label"><span class="live-dot"></span><span id="room-state">ВЕЧЕР · ДОМА</span><span class="label-sep">/</span><span id="weather">ТИХО И ТЕПЛО</span></div>
+    <section class="companion-chip"><div class="avatar">м</div><div><strong id="companion-name">Мира</strong><small><span class="mood-dot"></span><span id="mood">спокойное настроение</span></small></div><button id="change-person" class="swap" aria-label="Сменить персонажа">↻</button></section>
+    <button id="focus" class="focus-hint" aria-label="Поговорить с Мирой">Мира рядом <span>·</span> <b>коснись, чтобы поговорить</b><i>⌄</i></button>
+    <aside class="look-note" id="look-note">▱ &nbsp;проведи пальцем, чтобы оглядеться</aside>
+    <section class="conversation" id="conversation">
+      <div class="dialog-card"><div class="dialog-top"><div class="dialog-avatar">м</div><div class="dialog-meta"><div><strong id="dialog-name">Мира</strong><span id="emotion">· задумчивость</span></div><div class="dialog-caption">говорит тихо, будто не хочет спугнуть вечер</div></div><button class="close-dialog" id="close-dialog">×</button></div><p id="dialog-text">Я оставила чай на столе. Он уже не горячий, зато теперь можно держать чашку обеими руками.</p><div class="dialog-bottom"><span id="typing-indicator">рядом с тобой</span><button id="speak-reply" class="speak-reply" aria-label="Озвучить реплику">◖))</button></div></div>
+      <div class="quick-actions"><button data-command="Обними меня">♡ <span>Обнять</span></button><button data-command="Расскажи историю">✦ <span>История</span></button><button data-command="Завари чай">☕ <span>Чай</span></button><button data-command="Давай поговорим о мечтах">☾ <span>Мечты</span></button></div>
+    </section>
+    <div class="controls">
+      <div class="move-control"><div id="joystick" class="joystick"><div class="joy-ring"></div><div id="stick" class="stick"></div></div><span>движение</span></div>
+      <div class="center-controls"><button id="mic" class="round-control"><span>♩</span><small>голос</small></button><button id="text-toggle" class="round-control"><span>⌨</span><small>написать</small></button><button id="look-toggle" class="round-control active"><span>◉</span><small>обзор</small></button></div>
+      <button id="action" class="action-control"><span>✦</span><small>Действие</small></button>
+    </div>
+    <form class="composer" id="composer"><input id="message" autocomplete="off" placeholder="Скажи Мире что-нибудь…" maxlength="240" /><button aria-label="Отправить">↑</button></form>
+    <div class="toast" id="toast"></div>
+    <div class="modal-backdrop" id="settings"><section class="settings-card"><button class="close-settings" id="close-settings">×</button><div class="settings-kicker">ВАШ ВЕЧЕР</div><h2>Настроить комнату</h2><p>Небольшие вещи меняют настроение.</p><div class="setting-row"><div><b>Освещение</b><small>теплый вечерний свет</small></div><button class="toggle on" id="lamp-toggle"></button></div><div class="setting-row"><div><b>Звук комнаты</b><small>тихий дождь за окном</small></div><button class="toggle on" id="sound-toggle"></button></div><div class="setting-row"><div><b>Кто рядом</b><small>можно переключиться в любой момент</small></div><select id="character-select"><option value="mira">Мира</option><option value="artyom">Артём</option></select></div><button class="reset-memory" id="reset-memory">Начать знакомство заново</button><div class="privacy-note">Разговоры хранятся только в этом браузере. Голосовой ввод зависит от поддержки браузера.</div></section></div>
+    <div class="intro" id="intro"><div class="intro-card"><span class="intro-star">✦</span><div class="intro-overline">ОДНА ТИХАЯ КОМНАТА</div><h1>Побудь<br>немного <em>здесь.</em></h1><p>Вечер, мягкий свет и человек, который никуда не торопится.</p><button id="enter">Войти в комнату <span>→</span></button><small>игра сохраняет знакомые детали на этом устройстве</small></div></div>
+  </main>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
