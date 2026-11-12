@@ -1,0 +1,29 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;height:100%;overflow:hidden;background:#ead9e4}canvas{display:block;width:100%;height:100%}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/","@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.js"}}</script></head><body>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
+const scene=new THREE.Scene();scene.background=new THREE.Color('#ead9e4');
+const camera=new THREE.PerspectiveCamera(35,innerWidth/innerHeight,.1,30);camera.position.set(0,1.25,3.4);camera.lookAt(0,1.1,0);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;document.body.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight('#fff5fc','#b99cad',2.4));const key=new THREE.DirectionalLight('#fff0d9',3);key.position.set(-3,5,4);scene.add(key);
+const loader=new GLTFLoader();loader.register(p=>new VRMLoaderPlugin(p));
+const gradient=new THREE.DataTexture(new Uint8Array([95,150,215,255]),4,1,THREE.RedFormat);gradient.needsUpdate=true;gradient.minFilter=gradient.magFilter=THREE.NearestFilter;
+loader.load('./assets/lev.vrm',gltf=>{const vrm=gltf.userData.vrm;vrm.scene.rotation.y=Math.PI;scene.add(vrm.scene);vrm.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;
+  const src=o.material;
+  let color='#ffffff';
+  if(/Hair/i.test(src.name||''))color='#1d2c52';
+  if(/Tops/i.test(src.name||''))color='#b74259';
+  if(/Bottoms/i.test(src.name||''))color='#334b8e';
+  if(/Shoes/i.test(src.name||''))color='#b74259';
+  const m=new THREE.MeshToonMaterial({map:src.map||null,gradientMap:gradient,color,transparent:src.transparent,opacity:src.opacity,alphaTest:src.alphaTest,side:src.side,vertexColors:src.vertexColors});
+  o.material=m;
+  console.log(o.name,src.name,color,!!src.map);
+}});window.vrm=vrm;
+ const b=vrm.humanoid.getNormalizedBoneNode.bind(vrm.humanoid);
+ const lu=b('leftUpperArm'),ru=b('rightUpperArm'),ll=b('leftLowerArm'),rl=b('rightLowerArm');lu.rotation.z=1.25;ru.rotation.z=-1.25;ll.rotation.z=-.15;rl.rotation.z=.15;
+ vrm.expressionManager.setValue('relaxed',.3);
+},undefined,e=>{console.error(e)});
+function loop(){requestAnimationFrame(loop);if(window.vrm){vrm.update(.016);}renderer.render(scene,camera)}loop();
+</script></body></html>
