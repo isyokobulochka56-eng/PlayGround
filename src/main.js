@@ -1,5 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
-import { scene, camera, renderer, lampGlow, characterRoot, interactables, makeCompanion, animateCompanion } from './scene.js';
+import { scene, camera, renderer, lampGlow, characterRoot, interactables, makeCompanion, animateCompanion, setCompanionAction, setCompanionEmotion } from './scene.js';
 
 const $ = (selector) => document.querySelector(selector);
 const canvas = $('#scene');
@@ -48,39 +48,35 @@ function saveMemory() {
 }
 saveMemory();
 
-const names = { mira: 'Мира', artyom: 'Артём' };
+const names = { mira: 'Мира' };
 const introLines = {
-  mira: 'Я оставила чай на столе. Он уже не горячий, зато теперь можно держать чашку обеими руками.',
-  artyom: 'Хорошо, что ты заглянул. За окном дождь, а здесь можно никуда не спешить.'
+  mira: 'Я оставила чай у кровати. Луна сегодня похожа на театральный прожектор — будто вот-вот поднимется занавес.'
 };
-let currentCharacter = memory.character === 'artyom' ? 'artyom' : 'mira';
-function setCharacter(type, persist = true) {
-  currentCharacter = type === 'artyom' ? 'artyom' : 'mira';
-  makeCompanion(currentCharacter);
-  const name = names[currentCharacter];
-  const initial = currentCharacter === 'mira' ? 'м' : 'а';
-  $('#companion-name').textContent = name;
-  $('#dialog-name').textContent = name;
-  $('.avatar').textContent = initial;
-  $('.dialog-avatar').textContent = initial;
-  $('#mood').textContent = currentCharacter === 'mira' ? 'спокойное настроение' : 'тихая улыбка';
-  $('#character-select').value = currentCharacter;
-  $('#focus').innerHTML = `${name} рядом <span>·</span> <b>коснись, чтобы поговорить</b><i>⌄</i>`;
-  $('#message').placeholder = `Скажи ${name} что-нибудь…`;
-  $('#mic').setAttribute('aria-label', `Сказать голосом ${name}`);
-  if (persist) { memory.character = currentCharacter; saveMemory(); }
+const currentCharacter = 'mira';
+function setCharacter() {
+  makeCompanion('mira');
+  $('#companion-name').textContent = names.mira;
+  $('#dialog-name').textContent = names.mira;
+  $('.avatar').textContent = 'м';
+  $('.dialog-avatar').textContent = 'м';
+  $('#mood').textContent = 'спокойное настроение';
+  $('#focus').innerHTML = 'Мира рядом <span>·</span> <b>коснись, чтобы поговорить</b><i>⌄</i>';
+  $('#message').placeholder = 'Скажи Мире что-нибудь…';
+  $('#mic').setAttribute('aria-label', 'Сказать голосом Мире');
+  memory.character = 'mira';
+  saveMemory();
 }
-setCharacter(currentCharacter, false);
-$('#dialog-text').textContent = introLines[currentCharacter];
+setCharacter();
+$('#dialog-text').textContent = introLines.mira;
 
 const rules = [
-  { keys: ['обним', 'hug'], topic: 'объятия', emotion: 'тепло', mira: 'Мира мягко обнимает тебя, и на минуту весь мир становится размером с эту комнату.', artyom: 'Артём приобнимает тебя за плечи. За окном может идти дождь — здесь ты не один.' },
-  { keys: ['истор', 'сказ', 'story'], topic: 'истории', emotion: 'рассказывает историю', mira: 'В одном старом доме жил кот, который каждый вечер обходил все окна — проверял, всем ли хватает света. Однажды он уснул на подоконнике, и весь дом решил, что это он зажёг луну.', artyom: 'Когда-то я знал человека, который собирал красивые камешки с каждой прогулки. Говорил: так дорога не теряется. Наверное, некоторые вечера тоже хочется оставить себе.' },
-  { keys: ['чай', 'завар', 'напит', 'tea'], topic: 'чай', emotion: 'забота', mira: 'Чай уже заварен. Мира подвигает чашку поближе: «С жасмином. Запах напоминает сад после дождя».', artyom: 'Я как раз налил. Чёрный, покрепче — и оставил немного места для молока, если захочешь.' },
-  { keys: ['мечт', 'будущ', 'хотел', 'dream'], topic: 'мечты', emotion: 'мечтательность', mira: 'Если можно было бы проснуться завтра в любом месте, Мира выбрала бы маленький дом у моря — и утро, в котором никуда не надо.', artyom: 'Я бы отправился в поезд без расписания. Только книга, хороший термос и несколько новых станций.' },
-  { keys: ['груст', 'тяжел', 'плохо', 'устал', 'одиноко', 'тревож', 'боюсь'], topic: 'поддержка', emotion: 'внимание', mira: 'Не нужно сейчас подбирать правильные слова. Можно просто посидеть рядом. Хочешь — расскажи, что сегодня было самым трудным.', artyom: 'Не обязательно сразу всё исправлять. Я побуду здесь, пока ты соберёшься с мыслями.' },
-  { keys: ['спасибо', 'благодар'], topic: 'благодарность', emotion: 'улыбка', mira: 'Мира улыбается: «Спасибо, что разделил со мной этот вечер. Он стал чуть менее тихим — в хорошем смысле».', artyom: 'Всегда пожалуйста. Мне хорошо, что ты здесь.' },
-  { keys: ['привет', 'здравств', 'hello'], topic: 'приветствие', emotion: 'радость', mira: 'Привет. Здесь пахнет деревом и чаем, а спешка осталась снаружи. Как прошёл твой день?', artyom: 'Привет! Я как раз смотрел на дождь. Рад, что ты зашёл. Как ты?' }
+  { keys: ['истор', 'сказ', 'story'], topic: 'истории', emotion: 'рассказывает историю', reply: 'В одном старом театре был маленький кот, который выходил на пустую сцену после каждого спектакля. Он садился в первый ряд и смотрел на погасший занавес, будто аплодировал тем, кто уже ушёл домой. Мне нравится думать, что искусство остаётся с нами именно так — тихо, после финала.' },
+  { keys: ['кино', 'фильм', 'актёр', 'режиссёр', 'сцен', 'театр', 'спектак', 'пьес'], topic: 'кино и театр', emotion: 'оживление', reply: 'Я люблю, когда в фильме или спектакле есть сцена, которая ничего не объясняет напрямую — просто взгляд, пауза, свет на лице. Потом выходишь и ещё долго прокручиваешь её в голове. Какая сцена у тебя недавно осталась внутри?' },
+  { keys: ['чай', 'завар', 'напит', 'tea'], topic: 'чай', emotion: 'забота', reply: 'Чай уже заварен. Я оставила немного мёда: с жасмином он пахнет почти как сад после дождя. Давай устроим ему честную дегустацию?' },
+  { keys: ['мечт', 'будущ', 'хотел', 'dream'], topic: 'мечты', emotion: 'мечтательность', reply: 'Если бы завтра можно было проснуться где угодно, я бы выбрала маленький дом у моря и утро без расписания. А ты бы куда сбежал хотя бы на один день?' },
+  { keys: ['груст', 'тяжел', 'плохо', 'устал', 'одиноко', 'тревож', 'боюсь'], topic: 'поддержка', emotion: 'внимание', reply: 'Не нужно сейчас подбирать правильные слова. Можно просто посидеть рядом. Хочешь — расскажи, что сегодня было самым трудным; я не буду торопить.' },
+  { keys: ['спасибо', 'благодар'], topic: 'благодарность', emotion: 'улыбка', reply: 'Скажешь так — и у меня сразу появляется повод улыбнуться. Спасибо, что поделился со мной этим вечером.' },
+  { keys: ['привет', 'здравств', 'hello'], topic: 'вечер', emotion: 'радость', reply: 'Я всё думаю о финале того фильма, где героиня так и не сказала главного вслух. Иногда пауза честнее красивой речи, правда? Что у тебя сегодня крутится в голове?' }
 ];
 
 function showConversation(text, emotion = 'рядом с тобой') {
@@ -94,29 +90,78 @@ function hideConversation() { $('#conversation').classList.remove('open'); }
 function approachConversation() {
   memory.met = true;
   saveMemory();
-  showConversation(introLines[currentCharacter], currentCharacter === 'mira' ? 'задумчивость' : 'доброжелательность');
+  const remembered = memory.name ? `${memory.name}, ` : '';
+  const oldTopicWasCommand = [...actionCommands, ...emotionCommands].some((command) =>
+    command.keys.some((key) => (memory.lastTopic || '').toLowerCase().includes(key))
+  );
+  const rememberedTopic = oldTopicWasCommand ? '' : memory.lastTopic;
+  const line = memory.visits > 1
+    ? `${remembered}я оставила чай у кровати. В прошлый раз мы заговорили о теме «${rememberedTopic || 'твоего вечера'}» — я поймала себя на мысли, что всё ещё об этом думаю.`
+    : introLines.mira;
+  showConversation(line, 'задумчивость');
 }
+
+const actionCommands = [
+  { keys: ['обним', 'hug'], action: 'hug', emotion: 'shy', label: 'смущение', reply: 'Иди сюда… Мира мягко обнимает тебя, задерживаясь на мгновение дольше обычного.' },
+  { keys: ['подойди', 'подойду', 'приблиз', 'иди ко мне'], action: 'approach', emotion: 'joy', label: 'радость', reply: 'Мира подходит ближе и чуть улыбается: «Так лучше? Теперь я могу говорить потише».' },
+  { keys: ['сядь', 'сесть', 'садись', 'присяд'], action: 'sit', emotion: 'joy', label: 'спокойствие', reply: 'Мира садится на край кровати и похлопывает ладонью по месту рядом: «Осторожно, звёздная подушка сегодня занимает лучшие места».' },
+  { keys: ['встань', 'встать', 'поднимись'], action: 'idle', emotion: 'joy', label: 'готовность', reply: 'Мира встаёт и поправляет складки юбки: «Ну вот, снова на ногах. Что дальше?»' },
+  { keys: ['танц', 'потанц', 'dance'], action: 'dance', emotion: 'joy', label: 'радость', reply: 'Мира делает несколько лёгких танцевальных шагов, будто в комнате играет музыка только для вас двоих.' },
+  { keys: ['завари', 'сделай чай', 'налей чай'], action: 'tea', emotion: 'joy', label: 'забота', reply: 'Мира берёт чашку со столика и осторожно разливает чай. «Готово. Только дай ему минутку, он горячий».' }
+];
+const emotionCommands = [
+  { keys: ['грусти', 'грустн', 'печаль'], value: 'sad', label: 'грусть' },
+  { keys: ['смущ', 'застенчив'], value: 'shy', label: 'смущение' },
+  { keys: ['удив', 'шок'], value: 'surprised', label: 'удивление' },
+  { keys: ['радост', 'весел', 'улыбнись'], value: 'joy', label: 'радость' }
+];
 function respond(raw) {
   const text = raw.trim();
   if (!text) return;
   const lower = text.toLowerCase();
-  memory.lastTopic = text.slice(0, 100);
-  const nameMatch = text.match(/меня зовут\s+([^,.!?]+)/i);
-  if (nameMatch && !memory.name) memory.name = nameMatch[1].trim().slice(0, 32);
-  const matched = rules.find((rule) => rule.keys.some((key) => lower.includes(key)));
+  const nameMatch = text.match(/(?:меня зовут|зови меня|моё имя|мое имя)\s+([^,.!?]+)/i);
+  if (nameMatch) memory.name = nameMatch[1].trim().slice(0, 32);
+
+  const requestedEmotion = emotionCommands.find((item) => item.keys.some((key) => lower.includes(key)));
+  const requestedAction = actionCommands.find((item) => item.keys.some((key) => lower.includes(key)));
   let reply, emotion = 'внимание';
-  if (matched) {
-    reply = matched[currentCharacter]; emotion = matched.emotion;
-    if (!memory.likes.includes(matched.topic)) memory.likes.push(matched.topic);
-  } else if (/[?？]$/.test(text) || lower.startsWith('почему') || lower.startsWith('как ')) {
-    reply = currentCharacter === 'mira' ? 'Хороший вопрос. Мне кажется, ответ иногда появляется, если не торопить его. А ты сам к чему склоняешься?' : 'Я не уверен, что есть один ответ. Что тебе самому кажется самым важным здесь?';
-    emotion = 'слушает';
-  } else if (/люблю|нравится/.test(lower)) {
-    reply = currentCharacter === 'mira' ? 'Запомню. Мне нравится узнавать, какие вещи делают твой день теплее.' : 'Я это запомню. Такие детали здорово помогают почувствовать человека.';
+  let rememberedTopic = text;
+  if (requestedEmotion) {
+    setCompanionEmotion(requestedEmotion.value);
+    $('#mood').textContent = `${requestedEmotion.label} настроение`;
+    reply = `Мира меняет выражение лица на ${requestedEmotion.label === 'грусть' ? 'печальное' : requestedEmotion.label === 'удивление' ? 'удивлённое' : requestedEmotion.label === 'смущение' ? 'смущённое' : 'радостное'} и смотрит на тебя, ожидая реакции.`;
+    emotion = requestedEmotion.label;
+  } else if (requestedAction) {
+    setCompanionAction(requestedAction.action);
+    if (requestedAction.emotion) setCompanionEmotion(requestedAction.emotion);
+    $('#mood').textContent = requestedAction.label;
+    reply = requestedAction.reply;
+    emotion = requestedAction.label;
   } else {
-    reply = currentCharacter === 'mira' ? 'Мира чуть кивает, внимательно слушая. «Я запомню это. Хочешь рассказать чуть больше?»' : 'Артём слушает, не перебивая. «Я понял. Что в этом для тебя самое важное?»';
+    const matched = rules.find((rule) => rule.keys.some((key) => lower.includes(key)));
+    if (matched) {
+      reply = matched.reply;
+      emotion = matched.emotion;
+      rememberedTopic = matched.topic;
+      if (!memory.likes.includes(matched.topic)) memory.likes.push(matched.topic);
+    } else if (/[?？]$/.test(text) || lower.startsWith('почему') || lower.startsWith('как ')) {
+      reply = 'Хороший вопрос. Мне кажется, ответ иногда появляется, если не торопить его. А ты сам к чему склоняешься?';
+      emotion = 'слушает';
+    } else if (/меня зовут|зови меня|моё имя|мое имя/i.test(text)) {
+      reply = `Очень приятно, ${memory.name}. Постараюсь запомнить. А теперь расскажи: какой фильм ты пересматривал бы даже в дождливый вечер?`;
+      emotion = 'улыбка';
+    } else if (/люблю|нравится/.test(lower)) {
+      reply = 'Запомню. Мне нравится узнавать, какие вещи делают твой день теплее.';
+      emotion = 'интерес';
+    } else if (memory.lastTopic) {
+      reply = `Я запомнила, что ты говорил о «${memory.lastTopic}». Что в этом для тебя самое важное?`;
+      emotion = 'внимание';
+    } else {
+      reply = 'Мира чуть кивает, внимательно слушая: «Расскажи мне об этом ещё немного — мне правда интересно, что ты сам об этом думаешь».';
+    }
   }
-  if (memory.name) reply = reply.replace(/Мира/g, memory.name);
+  if (memory.name && !nameMatch && !reply.includes(memory.name)) reply = `${memory.name}, ${reply.charAt(0).toLowerCase()}${reply.slice(1)}`;
+  if (!requestedAction && !requestedEmotion && !nameMatch) memory.lastTopic = rememberedTopic.slice(0, 100);
   saveMemory();
   showConversation(reply, emotion);
 }
@@ -126,12 +171,11 @@ function interact(target = currentTarget) {
   const kind = target.userData.kind;
   if (kind === 'companion') { approachConversation(); return; }
   const lines = {
-    tea: currentCharacter === 'mira'
-      ? 'Чашка ещё хранит тепло. Мира замечает твой взгляд: «Я положила сюда немного мёда, если захочешь».'
-      : 'На блюдце тихо звякает ложка. Артём подвигает чашку к краю столика: «Угощайся».',
-    book: 'Книга раскрыта на странице с загнутым уголком. Между страницами засушен маленький лист.',
+    tea: 'Чашка ещё хранит тепло, а на блюдце лежит ложка мёда. Я выбирала его долго — не смейся, у чая тоже бывает характер.',
+    bed: 'Белое покрывало чуть сбилось, а звёздная подушка заняла почти всё место. Похоже, кто-то уже выбрал себе сторону кровати.',
+    desk: 'На экране застыл кадр старого фильма. Я никак не могу решить, красивее здесь свет или то, как актриса молчит.',
     window: 'За окном серебрится луна. Дождь почти стих, и на стекле остались только тонкие дорожки капель.',
-    shelf: 'На полке стоят книги, которые перечитывают, когда хочется снова оказаться в знакомом месте.'
+    shelf: 'На полке стоят книги и сценарии, которые перечитывают, когда хочется снова оказаться в знакомой истории.'
   };
   if (!memory.objects.includes(kind)) memory.objects.push(kind);
   saveMemory();
@@ -201,12 +245,6 @@ canvas.addEventListener('pointercancel', endLook);
 
 $('#action').addEventListener('click', () => interact());
 $('#focus').addEventListener('click', () => interact(currentTarget || interactables[0]));
-$('#change-person').addEventListener('click', () => {
-  setCharacter(currentCharacter === 'mira' ? 'artyom' : 'mira');
-  $('#dialog-text').textContent = currentCharacter === 'mira' ? 'Мира возвращается в кресло и улыбается тебе.' : 'Артём снова рядом. «Я как раз сохранил тебе место».';
-  toast(`Теперь рядом ${names[currentCharacter]}`);
-});
-$('#character-select').addEventListener('change', (event) => setCharacter(event.target.value));
 $('#close-dialog').addEventListener('click', hideConversation);
 $('#text-toggle').addEventListener('click', () => {
   const composer = $('#composer');
